@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using ScLib;
 
@@ -24,14 +25,22 @@ namespace Example
             foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
                 if (file.EndsWith("_tex.sc"))
                 {
-                    using (var compression = new Compression())
+                    try
                     {
-                        using (var fileStream = new FileStream(file, FileMode.Open))
+                        using (var compression = new Compression())
                         {
-                            Textures.GetBitmapBySc(
-                                    new MemoryStream(compression.Decompress(fileStream, States.CompressionType.Lzmha)))
-                                .Save(file.Replace(".sc", ".png"));
+                            using (var fileStream = new FileStream(file, FileMode.Open))
+                            {
+                                Textures.GetBitmapBySc(
+                                        new MemoryStream(compression.Decompress(fileStream,
+                                            States.CompressionType.Lzmha)))
+                                    .Save(file.Replace(".sc", ".png"));
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
                     }
 
                     File.Delete(file);
