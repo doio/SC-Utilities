@@ -43,12 +43,14 @@ namespace ScLib
             CoderPropID.EndMarker
         };
 
-        public byte[] Decompress(Stream inStream, CompressionType Type)
+        public byte[] DecompressByteArray(Stream inStream, CompressionType type) => DecompressStream(inStream, type).ToArray();
+
+        public MemoryStream Decompress(Stream inStream, CompressionType type)
         {
             var stream = new MemoryStream();
             var decoder = new Decoder();
 
-            if (Type == CompressionType.Lzmha)
+            if (type == CompressionType.Lzmha)
                 inStream.Seek(26, SeekOrigin.Current);
 
             var properties = new byte[5];
@@ -63,7 +65,7 @@ namespace ScLib
 
             inStream.Flush();
 
-            return stream.ToArray();
+            return stream;
         }
 
         /*public byte[] Compress(Stream inStream, CompressionType Type)

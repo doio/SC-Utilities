@@ -17,31 +17,10 @@ namespace ScLib
 
                 ushort width = reader.ReadUInt16(), heigth = reader.ReadUInt16();
 
-                int mtWidth, ttWidth, mtHeigth, ttHeigth;
-
-                switch (id)
-                {
-                    case 1:
-                    {
-                        mtWidth = width;
-                        ttWidth = width - mtWidth;
-
-                        mtHeigth = heigth;
-                        ttHeigth = heigth - mtHeigth;
-                        break;
-                    }
-
-                    default:
-                    {
-                        mtWidth = width % 32;
-                        ttWidth = (width - mtWidth) / 32;
-
-                        mtHeigth = heigth % 32;
-                        ttHeigth = (heigth - mtHeigth) / 32;
-
-                        break;
-                    }
-                }
+                int mtWidth = id == 1 ? width : width % 32,
+                    ttWidth = id == 1 ? width - mtWidth : (width - mtWidth) / 32,
+                    mtHeigth = id == 1 ? heigth : heigth % 32,
+                    ttHeigth = id == 1 ? heigth - mtHeigth : (heigth - mtHeigth) / 32;
 
                 var pixelArray = new Color[heigth, width];
 
