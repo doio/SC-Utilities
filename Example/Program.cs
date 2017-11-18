@@ -28,7 +28,7 @@ namespace Example
                     {
                         using (var fileStream = new FileStream(file, FileMode.Open))
                         {
-                            Textures.GetBitmapBySc(compression.Decompress(fileStream, States.CompressionType.Lzmha)).Save(file + ".png");
+                            Textures.GetBitmapBySc(new MemoryStream(compression.Decompress(fileStream, States.CompressionType.Lzmha))).Save(file + ".png");
                         }
                     }
 

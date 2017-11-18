@@ -43,9 +43,7 @@ namespace ScLib
             CoderPropID.EndMarker
         };
 
-        public byte[] DecompressByteArray(Stream inStream, CompressionType type) => Decompress(inStream, type).ToArray();
-
-        public MemoryStream Decompress(Stream inStream, CompressionType type)
+        public byte[] Decompress(Stream inStream, CompressionType type)
         {
             var stream = new MemoryStream();
             var decoder = new Decoder();
@@ -65,7 +63,7 @@ namespace ScLib
 
             inStream.Flush();
 
-            return stream;
+            return stream.ToArray();
         }
 
         /*public byte[] Compress(Stream inStream, CompressionType Type)
