@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using LZMA.Compress;
-using LZMA.Compress.LZMA;
+using SevenZip.Sdk.Compression.Lzma;
 using static ScLib.States;
+using SevenZip.Sdk;
 
 namespace ScLib
 {
@@ -31,18 +31,26 @@ namespace ScLib
 
         private bool isDisposed;
 
-        public readonly CoderPropID[] propIDs =
+        public readonly CoderPropId[] propIDs =
         {
-            CoderPropID.DictionarySize,
-            CoderPropID.PosStateBits,
-            CoderPropID.LitContextBits,
-            CoderPropID.LitPosBits,
-            CoderPropID.Algorithm,
-            CoderPropID.NumFastBytes,
-            CoderPropID.MatchFinder,
-            CoderPropID.EndMarker
+            CoderPropId.DictionarySize,
+            CoderPropId.PosStateBits,
+            CoderPropId.LitContextBits,
+            CoderPropId.LitPosBits,
+            CoderPropId.Algorithm,
+            CoderPropId.NumFastBytes,
+            CoderPropId.MatchFinder,
+            CoderPropId.EndMarker
         };
 
+        /// <summary>
+        /// Decompress a CSV or SC File
+        /// CSV Compressiontype: Lzma
+        /// SC Compressiontype: Lzmha
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public byte[] Decompress(Stream inStream, CompressionType type)
         {
             var stream = new MemoryStream();
@@ -62,11 +70,18 @@ namespace ScLib
             decoder.Code(inStream, stream, inStream.Length, BitConverter.ToInt32(buffer, 0), null);
 
             inStream.Flush();
+            inStream.Close();
 
             return stream.ToArray();
         }
 
-        /*public byte[] Compress(Stream inStream, CompressionType Type)
+        /// <summary>
+        /// Compress a CSV or SC File 
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <param name="Type"></param>
+        /// <returns></returns>
+        public byte[] Compress(Stream inStream, CompressionType type)
         {
             var stream = new MemoryStream();
             var encoder = new Encoder();
@@ -74,16 +89,13 @@ namespace ScLib
             encoder.SetCoderProperties(propIDs, properties);
             encoder.WriteCoderProperties(stream);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                var LengthHeader = BitConverter.GetBytes(inStream.Length);
-                stream.Write(LengthHeader, 0, LengthHeader.Length);
-            }
+            var lengthHeader = BitConverter.GetBytes(inStream.Length);
+            stream.Write(lengthHeader, 0, lengthHeader.Length);
 
             encoder.Code(inStream, stream, inStream.Length, -1, null);
 
             return stream.ToArray();
-        }*/
+        }
 
         public void Dispose()
         {

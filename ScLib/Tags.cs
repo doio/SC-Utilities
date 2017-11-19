@@ -2,6 +2,11 @@
 {
     public class Tags
     {
+        /// <summary>
+        /// Converts a id (player, clan...) into a hashtag
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static string Id2Tag(long id)
         {
             var hashtag = string.Empty;
@@ -25,6 +30,11 @@
             return hashtag;
         }
 
+        /// <summary>
+        /// Convert a tag to a high-low id
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
         public static int[] Tag2HighLow(string tag)
         {
             var tagArray = tag.Replace("#", "").ToUpper().ToCharArray();
@@ -43,7 +53,11 @@
             return new [] {high, low};
         }
 
-
+        /// <summary>
+        /// Convert a tag to a id
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
         public static long Tag2Id(string tag)
         {
             var tagArray = tag.Replace("#", "").ToUpper().ToCharArray();

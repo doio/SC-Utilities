@@ -1,18 +1,34 @@
+/*  This file is part of SevenZipSharp.
+
+    SevenZipSharp is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    SevenZipSharp is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with SevenZipSharp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+using System;
 using System.IO;
 
-namespace LZMA.Compress.RangeCoder
+namespace SevenZip.Sdk.Compression.RangeCoder
 {
     internal class Encoder
     {
-        public const uint kTopValue = 1 << 24;
+        public const uint kTopValue = (1 << 24);
         private byte _cache;
         private uint _cacheSize;
 
-        public ulong Low;
+        public UInt64 Low;
         public uint Range;
 
         private long StartPosition;
-
         private Stream Stream;
 
         public void SetStream(Stream stream)
@@ -37,7 +53,7 @@ namespace LZMA.Compress.RangeCoder
 
         public void FlushData()
         {
-            for (var i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
                 ShiftLow();
         }
 
@@ -46,41 +62,41 @@ namespace LZMA.Compress.RangeCoder
             Stream.Flush();
         }
 
-        public void CloseStream()
-        {
-            Stream.Close();
-        }
+        /*public void CloseStream()
+		{
+			Stream.Close();
+		}*/
 
-        public void Encode(uint start, uint size, uint total)
-        {
-            Low += start * (Range /= total);
-            Range *= size;
-            while (Range < kTopValue)
-            {
-                Range <<= 8;
-                ShiftLow();
-            }
-        }
+        /*public void Encode(uint start, uint size, uint total)
+		{
+			Low += start * (Range /= total);
+			Range *= size;
+			while (Range < kTopValue)
+			{
+				Range <<= 8;
+				ShiftLow();
+			}
+		}*/
 
         public void ShiftLow()
         {
             if ((uint) Low < 0xFF000000 || (uint) (Low >> 32) == 1)
             {
-                var temp = _cache;
+                byte temp = _cache;
                 do
                 {
                     Stream.WriteByte((byte) (temp + (Low >> 32)));
                     temp = 0xFF;
                 } while (--_cacheSize != 0);
-                _cache = (byte) ((uint) Low >> 24);
+                _cache = (byte) (((uint) Low) >> 24);
             }
             _cacheSize++;
-            Low = (uint) Low << 8;
+            Low = ((uint) Low) << 8;
         }
 
         public void EncodeDirectBits(uint v, int numTotalBits)
         {
-            for (var i = numTotalBits - 1; i >= 0; i--)
+            for (int i = numTotalBits - 1; i >= 0; i--)
             {
                 Range >>= 1;
                 if (((v >> i) & 1) == 1)
@@ -93,98 +109,108 @@ namespace LZMA.Compress.RangeCoder
             }
         }
 
-        public void EncodeBit(uint size0, int numTotalBits, uint symbol)
-        {
-            var newBound = (Range >> numTotalBits) * size0;
-            if (symbol == 0)
-            {
-                Range = newBound;
-            }
-            else
-            {
-                Low += newBound;
-                Range -= newBound;
-            }
-            while (Range < kTopValue)
-            {
-                Range <<= 8;
-                ShiftLow();
-            }
-        }
+        /*public void EncodeBit(uint size0, int numTotalBits, uint symbol)
+		{
+			uint newBound = (Range >> numTotalBits) * size0;
+			if (symbol == 0)
+				Range = newBound;
+			else
+			{
+				Low += newBound;
+				Range -= newBound;
+			}
+			while (Range < kTopValue)
+			{
+				Range <<= 8;
+				ShiftLow();
+			}
+		}*/
 
         public long GetProcessedSizeAdd()
         {
             return _cacheSize +
                    Stream.Position - StartPosition + 4;
+            // (long)Stream.GetProcessedSize();
         }
     }
 
     internal class Decoder
     {
-        public const uint kTopValue = 1 << 24;
+        public const uint kTopValue = (1 << 24);
         public uint Code;
         public uint Range;
+        // public Buffer.InBuffer Stream = new Buffer.InBuffer(1 << 16);
         public Stream Stream;
 
         public void Init(Stream stream)
         {
+            // Stream.Init(stream);
             Stream = stream;
 
             Code = 0;
             Range = 0xFFFFFFFF;
-            for (var i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
                 Code = (Code << 8) | (byte) Stream.ReadByte();
         }
 
         public void ReleaseStream()
         {
+            // Stream.ReleaseStream();
             Stream = null;
         }
 
-        public void CloseStream()
-        {
-            Stream.Close();
-        }
+        /*public void CloseStream()
+		{
+			Stream.Close();
+		}*/
 
-        public void Normalize()
-        {
-            while (Range < kTopValue)
-            {
-                Code = (Code << 8) | (byte) Stream.ReadByte();
-                Range <<= 8;
-            }
-        }
+        /*public void Normalize()
+		{
+			while (Range < kTopValue)
+			{
+				Code = (Code << 8) | (byte)Stream.ReadByte();
+				Range <<= 8;
+			}
+		}*/
 
-        public void Normalize2()
-        {
-            if (Range < kTopValue)
-            {
-                Code = (Code << 8) | (byte) Stream.ReadByte();
-                Range <<= 8;
-            }
-        }
+        /*public void Normalize2()
+		{
+			if (Range < kTopValue)
+			{
+				Code = (Code << 8) | (byte)Stream.ReadByte();
+				Range <<= 8;
+			}
+		}*/
 
-        public uint GetThreshold(uint total)
-        {
-            return Code / (Range /= total);
-        }
+        /*public uint GetThreshold(uint total)
+		{
+			return Code / (Range /= total);
+		}*/
 
-        public void Decode(uint start, uint size, uint total)
-        {
-            Code -= start * Range;
-            Range *= size;
-            Normalize();
-        }
+        /*public void Decode(uint start, uint size, uint total)
+		{
+			Code -= start * Range;
+			Range *= size;
+			Normalize();
+		}*/
 
         public uint DecodeDirectBits(int numTotalBits)
         {
-            var range = Range;
-            var code = Code;
+            uint range = Range;
+            uint code = Code;
             uint result = 0;
-            for (var i = numTotalBits; i > 0; i--)
+            for (int i = numTotalBits; i > 0; i--)
             {
                 range >>= 1;
-                var t = (code - range) >> 31;
+                /*
+				result <<= 1;
+				if (code >= range)
+				{
+					code -= range;
+					result |= 1;
+				}
+				*/
+                uint t = (code - range) >> 31;
                 code -= range & (t - 1);
                 result = (result << 1) | (1 - t);
 
@@ -199,23 +225,25 @@ namespace LZMA.Compress.RangeCoder
             return result;
         }
 
-        public uint DecodeBit(uint size0, int numTotalBits)
-        {
-            var newBound = (Range >> numTotalBits) * size0;
-            uint symbol;
-            if (Code < newBound)
-            {
-                symbol = 0;
-                Range = newBound;
-            }
-            else
-            {
-                symbol = 1;
-                Code -= newBound;
-                Range -= newBound;
-            }
-            Normalize();
-            return symbol;
-        }
+        /*public uint DecodeBit(uint size0, int numTotalBits)
+		{
+			uint newBound = (Range >> numTotalBits) * size0;
+			uint symbol;
+			if (Code < newBound)
+			{
+				symbol = 0;
+				Range = newBound;
+			}
+			else
+			{
+				symbol = 1;
+				Code -= newBound;
+				Range -= newBound;
+			}
+			Normalize();
+			return symbol;
+		}*/
+
+        // ulong GetProcessedSize() {return Stream.GetProcessedSize(); }
     }
 }

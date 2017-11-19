@@ -1,8 +1,24 @@
+/*  This file is part of SevenZipSharp.
+
+    SevenZipSharp is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    SevenZipSharp is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with SevenZipSharp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 using System.IO;
 
-namespace LZMA.Common
+namespace SevenZip.Sdk.Buffer
 {
-    public class OutBuffer
+    internal class OutBuffer
     {
         private readonly byte[] m_Buffer;
         private readonly uint m_BufferSize;
@@ -10,6 +26,10 @@ namespace LZMA.Common
         private ulong m_ProcessedSize;
         private Stream m_Stream;
 
+        /// <summary>
+        /// Initializes a new instance of the OutBuffer class
+        /// </summary>
+        /// <param name="bufferSize"></param>
         public OutBuffer(uint bufferSize)
         {
             m_Buffer = new byte[bufferSize];

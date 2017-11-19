@@ -22,6 +22,7 @@ namespace Example
             if (!Directory.Exists("Files"))
                 Directory.CreateDirectory("Files");
 
+            // Decmpress and export SC File
             foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
                 if (file.EndsWith("_tex.sc"))
                 {
@@ -49,6 +50,90 @@ namespace Example
                 {
                     File.Delete(file);
                 }
+
+            // Compress CSV File Example
+            /*foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
+                if (file.EndsWith(".csv"))
+                {
+                    try
+                    {
+                        using (var compression = new Compression())
+                        {
+                            using (var fileStream = new FileStream(file, FileMode.Open))
+                            {
+                                using (var fileStreamNew = new FileStream(file.Replace(".csv", "_compressed.csv"), FileMode.Create))
+                                {
+                                    var buffer = compression.Compress(fileStream, States.CompressionType.Lzma);
+
+                                    fileStreamNew.Write(buffer, 0, buffer.Length);
+                                }
+                            }
+                        }
+
+                        File.Delete(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                        Console.ReadKey();
+                    }
+                }*/
+
+            // Decompress SC File Example
+            /*foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
+                if (file.EndsWith(".sc"))
+                {
+                    try
+                    {
+                        using (var compression = new Compression())
+                        {
+                            using (var fileStream = new FileStream(file, FileMode.Open))
+                            {
+                                var buffer = compression.Decompress(fileStream, States.CompressionType.Lzmha);
+
+                                fileStream.Close();
+
+                                using (var fileStreamNew = new FileStream(file, FileMode.Create))
+                                {                                 
+                                    fileStreamNew.Write(buffer, 0, buffer.Length);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                        Console.ReadKey();
+                    }
+                }*/
+
+            // Compress SC File Example
+            /*foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
+                if (file.EndsWith(".sc"))
+                {
+                    try
+                    {
+                        using (var compression = new Compression())
+                        {
+                            using (var fileStream = new FileStream(file, FileMode.Open))
+                            {
+                                using (var fileStreamNew = new FileStream(file.Replace("_decompressed.sc", "_compressed.sc"), FileMode.Create))
+                                {
+                                    var buffer = compression.Compress(fileStream, States.CompressionType.Lzma);
+
+                                    fileStreamNew.Write(buffer, 0, buffer.Length);
+                                }
+                            }
+                        }
+
+                        File.Delete(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                        Console.ReadKey();
+                    }
+                }*/
         }
     }
 }

@@ -1,31 +1,80 @@
+/*  This file is part of SevenZipSharp.
+
+    SevenZipSharp is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    SevenZipSharp is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with SevenZipSharp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+using System;
 using System.IO;
 
-namespace LZMA.Compress.LZ
+namespace SevenZip.Sdk.Compression.LZ
 {
-    public class InWindow
+    /// <summary>
+    /// Input window class
+    /// </summary>
+    internal class InWindow
     {
-        public uint _blockSize;
-        public byte[] _bufferBase;
+        /// <summary>
+        /// Size of Allocated memory block
+        /// </summary>
+        public UInt32 _blockSize;
 
-        public uint _bufferOffset;
-        private uint _keepSizeAfter;
-        private uint _keepSizeBefore;
+        /// <summary>
+        /// The pointer to buffer with data
+        /// </summary>
+        public Byte[] _bufferBase;
 
-        private uint _pointerToLastSafePosition;
-        public uint _pos;
-        private uint _posLimit;
+        /// <summary>
+        /// Buffer offset value
+        /// </summary>
+        public UInt32 _bufferOffset;
+
+        /// <summary>
+        /// How many BYTEs must be kept buffer after _pos
+        /// </summary>
+        private UInt32 _keepSizeAfter;
+
+        /// <summary>
+        /// How many BYTEs must be kept in buffer before _pos
+        /// </summary>
+        private UInt32 _keepSizeBefore;
+
+        private UInt32 _pointerToLastSafePosition;
+
+        /// <summary>
+        /// Offset (from _buffer) of curent byte
+        /// </summary>
+        public UInt32 _pos;
+
+        private UInt32 _posLimit; // offset (from _buffer) of first byte when new block reading must be done
         private Stream _stream;
-        private bool _streamEndWasReached;
-        public uint _streamPos;
+        private bool _streamEndWasReached; // if (true) then _streamPos shows real end of stream
+
+        /// <summary>
+        /// Offset (from _buffer) of first not read byte from Stream
+        /// </summary>
+        public UInt32 _streamPos;
 
         public void MoveBlock()
         {
-            var offset = _bufferOffset + _pos - _keepSizeBefore;
-
+            UInt32 offset = (_bufferOffset) + _pos - _keepSizeBefore;
+            // we need one additional byte, since MovePos moves on 1 byte.
             if (offset > 0)
                 offset--;
 
-            for (uint i = 0; i < _bufferOffset + _streamPos - offset; i++)
+            UInt32 numBytes = (_bufferOffset) + _streamPos - offset;
+
+            // check negative offset ????
+            for (UInt32 i = 0; i < numBytes; i++)
                 _bufferBase[i] = _bufferBase[offset + i];
             _bufferOffset -= offset;
         }
@@ -36,21 +85,21 @@ namespace LZMA.Compress.LZ
                 return;
             while (true)
             {
-                var size = (int) (0 - _bufferOffset + _blockSize - _streamPos);
+                var size = (int) ((0 - _bufferOffset) + _blockSize - _streamPos);
                 if (size == 0)
                     return;
-                var numReadBytes = _stream.Read(_bufferBase, (int) (_bufferOffset + _streamPos), size);
+                int numReadBytes = _stream.Read(_bufferBase, (int) (_bufferOffset + _streamPos), size);
                 if (numReadBytes == 0)
                 {
                     _posLimit = _streamPos;
-                    var pointerToPostion = _bufferOffset + _posLimit;
+                    UInt32 pointerToPostion = _bufferOffset + _posLimit;
                     if (pointerToPostion > _pointerToLastSafePosition)
-                        _posLimit = _pointerToLastSafePosition - _bufferOffset;
+                        _posLimit = (_pointerToLastSafePosition - _bufferOffset);
 
                     _streamEndWasReached = true;
                     return;
                 }
-                _streamPos += (uint) numReadBytes;
+                _streamPos += (UInt32) numReadBytes;
                 if (_streamPos >= _pos + _keepSizeAfter)
                     _posLimit = _streamPos - _keepSizeAfter;
             }
@@ -61,16 +110,16 @@ namespace LZMA.Compress.LZ
             _bufferBase = null;
         }
 
-        public void Create(uint keepSizeBefore, uint keepSizeAfter, uint keepSizeReserv)
+        public void Create(UInt32 keepSizeBefore, UInt32 keepSizeAfter, UInt32 keepSizeReserv)
         {
             _keepSizeBefore = keepSizeBefore;
             _keepSizeAfter = keepSizeAfter;
-            var blockSize = keepSizeBefore + keepSizeAfter + keepSizeReserv;
+            UInt32 blockSize = keepSizeBefore + keepSizeAfter + keepSizeReserv;
             if (_bufferBase == null || _blockSize != blockSize)
             {
                 Free();
                 _blockSize = blockSize;
-                _bufferBase = new byte[_blockSize];
+                _bufferBase = new Byte[_blockSize];
             }
             _pointerToLastSafePosition = _blockSize - keepSizeAfter;
         }
@@ -99,42 +148,50 @@ namespace LZMA.Compress.LZ
             _pos++;
             if (_pos > _posLimit)
             {
-                var pointerToPostion = _bufferOffset + _pos;
+                UInt32 pointerToPostion = _bufferOffset + _pos;
                 if (pointerToPostion > _pointerToLastSafePosition)
                     MoveBlock();
                 ReadBlock();
             }
         }
 
-        public byte GetIndexByte(int index)
+        public Byte GetIndexByte(Int32 index)
         {
             return _bufferBase[_bufferOffset + _pos + index];
         }
 
-        public uint GetMatchLen(int index, uint distance, uint limit)
+        /// <summary>
+        /// index + limit have not to exceed _keepSizeAfter
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="distance"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public UInt32 GetMatchLen(Int32 index, UInt32 distance, UInt32 limit)
         {
             if (_streamEndWasReached)
-                if (_pos + index + limit > _streamPos)
-                    limit = _streamPos - (uint) (_pos + index);
+                if ((_pos + index) + limit > _streamPos)
+                    limit = _streamPos - (UInt32) (_pos + index);
             distance++;
-            var pby = _bufferOffset + _pos + (uint) index;
+            // Byte *pby = _buffer + (size_t)_pos + index;
+            UInt32 pby = _bufferOffset + _pos + (UInt32) index;
 
-            uint i;
+            UInt32 i;
             for (i = 0; i < limit && _bufferBase[pby + i] == _bufferBase[pby + i - distance]; i++) ;
             return i;
         }
 
-        public uint GetNumAvailableBytes()
+        public UInt32 GetNumAvailableBytes()
         {
             return _streamPos - _pos;
         }
 
-        public void ReduceOffsets(int subValue)
+        public void ReduceOffsets(Int32 subValue)
         {
-            _bufferOffset += (uint) subValue;
-            _posLimit -= (uint) subValue;
-            _pos -= (uint) subValue;
-            _streamPos -= (uint) subValue;
+            _bufferOffset += (UInt32) subValue;
+            _posLimit -= (UInt32) subValue;
+            _pos -= (UInt32) subValue;
+            _streamPos -= (UInt32) subValue;
         }
     }
 }

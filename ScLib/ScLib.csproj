@@ -55,7 +55,6 @@
     <Compile Include="LZMA\Compress\RangeCoder\RangeCoder.cs" />
     <Compile Include="LZMA\Compress\RangeCoder\RangeCoderBit.cs" />
     <Compile Include="LZMA\Compress\RangeCoder\RangeCoderBitTree.cs" />
-    <Compile Include="LZMA\FileStreamCoder.cs" />
     <Compile Include="LZMA\ICoder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="States.cs" />

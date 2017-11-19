@@ -13,6 +13,11 @@ namespace ScLib
             0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
         };
 
+        /// <summary>
+        /// Exports the texture from a SC File
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <returns></returns>
         public static Bitmap GetBitmapBySc(Stream inStream)
         {
             using (var reader = new BinaryReader(inStream))
@@ -66,6 +71,12 @@ namespace ScLib
             }
         }
 
+        /// <summary>
+        /// Get the color by the given pixel format
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="pxFormat"></param>
+        /// <returns></returns>
         private static Color GetColorByPxFormat(BinaryReader reader, int pxFormat)
         {
             Color Color;

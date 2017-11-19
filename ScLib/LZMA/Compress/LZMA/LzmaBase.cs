@@ -1,55 +1,70 @@
-namespace LZMA.Compress.LZMA
+/*  This file is part of SevenZipSharp.
+
+    SevenZipSharp is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    SevenZipSharp is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with SevenZipSharp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+namespace SevenZip.Sdk.Compression.Lzma
 {
     internal abstract class Base
     {
-        public const uint kNumRepDistances = 4;
-        public const uint kNumStates = 12;
-
-        public const int kNumPosSlotBits = 6;
-
+        public const uint kAlignMask = (kAlignTableSize - 1);
+        public const uint kAlignTableSize = 1 << kNumAlignBits;
         public const int kDicLogSizeMin = 0;
-
-        public const int kNumLenToPosStatesBits = 2;
-        public const uint kNumLenToPosStates = 1 << kNumLenToPosStatesBits;
+        public const uint kEndPosModelIndex = 14;
+        public const uint kMatchMaxLen = kMatchMinLen + kNumLenSymbols - 1;
+        // public const int kDicLogSizeMax = 30;
+        // public const uint kDistTableSizeMax = kDicLogSizeMax * 2;
 
         public const uint kMatchMinLen = 2;
 
         public const int kNumAlignBits = 4;
-        public const uint kAlignTableSize = 1 << kNumAlignBits;
-        public const uint kAlignMask = kAlignTableSize - 1;
 
-        public const uint kStartPosModelIndex = 4;
-        public const uint kEndPosModelIndex = 14;
-        public const uint kNumPosModels = kEndPosModelIndex - kStartPosModelIndex;
-
-        public const uint kNumFullDistances = 1 << ((int) kEndPosModelIndex / 2);
-
-        public const uint kNumLitPosStatesBitsEncodingMax = 4;
-        public const uint kNumLitContextBitsMax = 8;
-
-        public const int kNumPosStatesBitsMax = 4;
-        public const uint kNumPosStatesMax = 1 << kNumPosStatesBitsMax;
-        public const int kNumPosStatesBitsEncodingMax = 4;
-        public const uint kNumPosStatesEncodingMax = 1 << kNumPosStatesBitsEncodingMax;
-
-        public const int kNumLowLenBits = 3;
-        public const int kNumMidLenBits = 3;
+        public const uint kNumFullDistances = 1 << ((int) kEndPosModelIndex/2);
         public const int kNumHighLenBits = 8;
-        public const uint kNumLowLenSymbols = 1 << kNumLowLenBits;
-        public const uint kNumMidLenSymbols = 1 << kNumMidLenBits;
 
         public const uint kNumLenSymbols = kNumLowLenSymbols + kNumMidLenSymbols +
                                            (1 << kNumHighLenBits);
 
-        public const uint kMatchMaxLen = kMatchMinLen + kNumLenSymbols - 1;
+        public const uint kNumLenToPosStates = 1 << kNumLenToPosStatesBits;
+        public const int kNumLenToPosStatesBits = 2; // it's for speed optimization
+
+        public const uint kNumLitContextBitsMax = 8;
+        public const uint kNumLitPosStatesBitsEncodingMax = 4;
+
+        public const int kNumLowLenBits = 3;
+        public const uint kNumLowLenSymbols = 1 << kNumLowLenBits;
+        public const int kNumMidLenBits = 3;
+        public const uint kNumMidLenSymbols = 1 << kNumMidLenBits;
+        public const uint kNumPosModels = kEndPosModelIndex - kStartPosModelIndex;
+        public const int kNumPosSlotBits = 6;
+        public const int kNumPosStatesBitsEncodingMax = 4;
+        public const int kNumPosStatesBitsMax = 4;
+        public const uint kNumPosStatesEncodingMax = (1 << kNumPosStatesBitsEncodingMax);
+        public const uint kNumPosStatesMax = (1 << kNumPosStatesBitsMax);
+        public const uint kNumRepDistances = 4;
+        public const uint kNumStates = 12;
+        public const uint kStartPosModelIndex = 4;
 
         public static uint GetLenToPosState(uint len)
         {
             len -= kMatchMinLen;
             if (len < kNumLenToPosStates)
                 return len;
-            return kNumLenToPosStates - 1;
+            return (kNumLenToPosStates - 1);
         }
+
+        #region Nested type: State
 
         public struct State
         {
@@ -87,5 +102,7 @@ namespace LZMA.Compress.LZMA
                 return Index < 7;
             }
         }
+
+        #endregion
     }
 }

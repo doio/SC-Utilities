@@ -1,21 +1,39 @@
+/*  This file is part of SevenZipSharp.
+
+    SevenZipSharp is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    SevenZipSharp is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with SevenZipSharp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 using System.IO;
 
-namespace LZMA.Compress.LZ
+namespace SevenZip.Sdk.Compression.LZ
 {
-    public class OutWindow
+    internal class OutWindow
     {
         private byte[] _buffer;
         private uint _pos;
         private Stream _stream;
         private uint _streamPos;
         private uint _windowSize;
-
         public uint TrainSize;
 
         public void Create(uint windowSize)
         {
             if (_windowSize != windowSize)
+            {
+                // System.GC.Collect();
                 _buffer = new byte[windowSize];
+            }
             _windowSize = windowSize;
             _pos = 0;
             _streamPos = 0;
@@ -35,17 +53,17 @@ namespace LZMA.Compress.LZ
 
         public bool Train(Stream stream)
         {
-            var len = stream.Length;
-            var size = len < _windowSize ? (uint) len : _windowSize;
+            long len = stream.Length;
+            uint size = (len < _windowSize) ? (uint) len : _windowSize;
             TrainSize = size;
             stream.Position = len - size;
             _streamPos = _pos = 0;
             while (size > 0)
             {
-                var curSize = _windowSize - _pos;
+                uint curSize = _windowSize - _pos;
                 if (size < curSize)
                     curSize = size;
-                var numReadBytes = stream.Read(_buffer, (int) _pos, (int) curSize);
+                int numReadBytes = stream.Read(_buffer, (int) _pos, (int) curSize);
                 if (numReadBytes == 0)
                     return false;
                 size -= (uint) numReadBytes;
@@ -65,7 +83,7 @@ namespace LZMA.Compress.LZ
 
         public void Flush()
         {
-            var size = _pos - _streamPos;
+            uint size = _pos - _streamPos;
             if (size == 0)
                 return;
             _stream.Write(_buffer, (int) _streamPos, (int) size);
@@ -76,7 +94,7 @@ namespace LZMA.Compress.LZ
 
         public void CopyBlock(uint distance, uint len)
         {
-            var pos = _pos - distance - 1;
+            uint pos = _pos - distance - 1;
             if (pos >= _windowSize)
                 pos += _windowSize;
             for (; len > 0; len--)
@@ -98,7 +116,7 @@ namespace LZMA.Compress.LZ
 
         public byte GetByte(uint distance)
         {
-            var pos = _pos - distance - 1;
+            uint pos = _pos - distance - 1;
             if (pos >= _windowSize)
                 pos += _windowSize;
             return _buffer[pos];
