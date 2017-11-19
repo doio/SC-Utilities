@@ -7,6 +7,12 @@ namespace ScLib
 {
     public class Textures
     {
+        private static readonly int[] Convert5To8 =
+        {
+            0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39, 0x41, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x73, 0x7B, 0x83, 0x8B,
+            0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
+        };
+
         public static Bitmap GetBitmapBySc(Stream inStream)
         {
             using (var reader = new BinaryReader(inStream))
@@ -92,6 +98,20 @@ namespace ScLib
                     break;
                 }
 
+                case 3:
+                {
+                    var color = reader.ReadUInt16();
+
+                    var red = Convert5To8[(color >> 11) & 0x1F];
+                    var green = Convert5To8[(color >> 6) & 0x1F];
+                    var blue = Convert5To8[(color >> 1) & 0x1F];
+                    var alpha = (color & 0x0001) == 1 ? 0xFF : 0x00;
+
+                    Color = Color.FromArgb(alpha, red, green, blue);
+
+                    break;
+                }
+
                 case 4:
                 {
                     var color = reader.ReadUInt16();
@@ -109,12 +129,18 @@ namespace ScLib
                 {
                     var color = reader.ReadUInt16();
 
-                    var r = color >> 8;
-                    var g = color >> 8;
-                    var b = color >> 8;
-                    var a = color >> 0xFF;
+                    var rgb = color >> 8;
 
-                    Color = Color.FromArgb(a, r, g, b);
+                    Color = Color.FromArgb(color >> 0xFF, rgb, rgb, rgb);
+
+                    break;
+                }
+
+                case 10:
+                {
+                    var color = reader.ReadByte();
+
+                    Color = Color.FromArgb(color, color, color);
 
                     break;
                 }
