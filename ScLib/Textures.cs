@@ -2,6 +2,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Text;
+using ScLib.SC;
 
 namespace ScLib
 {
@@ -14,7 +16,7 @@ namespace ScLib
         };
 
         /// <summary>
-        /// Exports the texture from a SC File
+        ///     Exports the texture from a SC File
         /// </summary>
         /// <param name="inStream"></param>
         /// <returns></returns>
@@ -71,8 +73,57 @@ namespace ScLib
             }
         }
 
+        public static ScInfoFile ReadScInfo(Stream inStream)
+        {
+            var info = new ScInfoFile();
+
+            using (var reader = new BinaryReader(inStream))
+            {
+                info.ShapeCount = reader.ReadUInt16();
+                info.MovieClipCount = reader.ReadUInt16();
+                info.TextureCount = reader.ReadUInt16();
+                info.TextCount = reader.ReadUInt16();
+                info.MatrixCount = reader.ReadUInt16();
+                info.ColorTransformCount = reader.ReadUInt16();
+
+                if (reader.BaseStream.CanSeek)
+                    reader.BaseStream.Seek(5, SeekOrigin.Current);
+                else
+                    throw new Exception("Can't skip bytes.");
+
+                info.ExportCount = reader.ReadUInt16();
+
+                for (var i = 0; i < info.ExportCount; i++)
+                    info.Exports.Add(new Export
+                    {
+                        Id = reader.ReadUInt16()
+                    });
+
+                for (var i = 0; i < info.ExportCount; i++)
+                    info.Exports[i].Name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadByte()));
+
+                /*if (reader.BaseStream.Position != reader.BaseStream.Length)
+                {
+                    var blockType = reader.ReadByte();
+                    var blockSize = reader.ReadUInt32();
+
+                    Console.WriteLine($"Type: {blockType}, Size: {blockSize}.");
+
+                    switch (blockType)
+                    {
+                        case 23:
+                        {
+                            break;
+                        }
+                    }
+                }*/
+            }
+
+            return info;
+        }
+
         /// <summary>
-        /// Get the color by the given pixel format
+        ///     Get the color by the given pixel format
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="pxFormat"></param>

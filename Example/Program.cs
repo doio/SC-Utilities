@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using ScLib;
 
 namespace Example
@@ -21,6 +22,34 @@ namespace Example
 
             if (!Directory.Exists("Files"))
                 Directory.CreateDirectory("Files");
+
+            // Show SC Info Example
+            /*foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
+                if (file.EndsWith(".sc"))
+                {
+                    try
+                    {
+                        using (var compression = new Compression())
+                        {
+                            using (var fileStream = new FileStream(file, FileMode.Open))
+                            {
+                                var info = Textures.ReadScInfo(new MemoryStream(compression.Decompress(fileStream, States.CompressionType.Lzmha)));
+                                Console.WriteLine(info.ToString());
+
+                                foreach (var export in info.Exports.OrderBy(e => e.Id))
+                                {
+                                    Console.WriteLine($"ID: {export.Id}, Name: {export.Name}.");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+
+                    Console.ReadKey();
+                }*/
 
             // Decmpress and export SC File
             foreach (var file in Directory.GetFiles(Directory.GetCurrentDirectory() + "/Files"))
